@@ -1,0 +1,16 @@
+- name: Install NGINX
+  apt:
+    name: "{{ nginx_packages }}"
+    state: latest
+
+- name: Deploy dynamic index.html with system information
+  template:
+    src: index.html.j2
+    dest: "{{ default_index_path }}/index.html"
+    mode: '0644'
+
+- name: Ensure NGINX is started and enabled
+  systemd:
+    name: "{{ nginx_service }}"
+    state: started
+    enabled: yes
