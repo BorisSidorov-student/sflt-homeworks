@@ -15,13 +15,3 @@ all:
 EOF
   filename =  "./inventory.yml"
 }
-
-locals {
-  vm_list = [
-    for instance in yandex_compute_instance.vm :{
-      name = instance.name
-      nat_ip = instance.network_interface.0.nat_ip_address
-      user = var.user_name
-    }
-  ]
-}
