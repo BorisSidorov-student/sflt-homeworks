@@ -1,0 +1,40 @@
+#cloud-config
+disable_root: true
+timezone: Europe/Moscow
+repo_update: true
+repo_upgrade: true
+apt:
+  preserve_sources_list: true
+
+# установка необходимых пакетов
+packages:
+  - nginx
+  - curl
+
+users:
+  - name: user
+    groups: sudo
+    shell: /bin/bash
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILbYVXKpJhAiLqixlJa2dsvkFyHiA/UQXa2ecb8y+or6 pclocal_key
+
+# создание скрипта для формирования файла index.html
+write_files:
+  - path: "/opt/script.sh"
+    permissions: "0755"
+    content: |
+      #!/bin/bash
+      HOSTNAME=$(hostname)
+      INTERNAL_IP=$(curl -s http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/ip/ -H "Metadata-Flavor: Google")
+      EXTERNAL_IP=$(curl ifconfig.me)
+      cat > /var/www/html/index.html << EOF
+      <h1>This is ${HOSTNAME} internal ip address is ${INTERNAL_IP}, external ip is ${EXTERNAL_IP}</h1>
+      EOF
+
+# запуск выполнения скрипта, перезагрузка и активация демоня nginx
+runcmd:
+  - /opt/script.sh
+  - [ systemctl, nginx-reload ]
+  - [ systemctl, enable, nginx.service ]
+  - [ systemctl, start, --no-block, nginx.service ]
