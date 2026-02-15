@@ -1,4 +1,0 @@
-nginx_packages: nginx
-nginx_service: nginx
-default_index_path: "/var/www/html"
-config_path: "/etc/nginx/sites-available"
